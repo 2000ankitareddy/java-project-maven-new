@@ -22,7 +22,7 @@ stages {
         }
     }
 
-    stage('Stop and Remove Old Container') {
+    stage('Stop Old Container') {
         steps {
             sh '''
             docker stop java-container || true
@@ -33,25 +33,19 @@ stages {
 
     stage('Remove Old Image') {
         steps {
-            sh '''
-            docker rmi java-maven-app || true
-            '''
+            sh 'docker rmi java-maven-app || true'
         }
     }
 
     stage('Build Docker Image') {
         steps {
-            sh '''
-            docker build -t java-maven-app .
-            '''
+            sh 'docker build -t java-maven-app .'
         }
     }
 
     stage('Run Docker Container') {
         steps {
-            sh '''
-            docker run -d -p 8033:8080 --name java-container java-maven-app
-            '''
+            sh 'docker run -d -p 8033:8080 --name java-container java-maven-app'
         }
     }
 
