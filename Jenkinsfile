@@ -33,7 +33,7 @@ stages {
         steps {
             sh '''
             docker rm -f java-container || true
-            docker run -d -p 8080:8080 --name java-container java-maven-app
+            docker run -d -p 8033:8080 --name java-container java-maven-app
             '''
         }
     }
