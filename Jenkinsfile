@@ -1,7 +1,7 @@
 pipeline {
 agent any
 
-```
+
 stages {
 
     stage('Clone Repository') {
@@ -45,6 +45,6 @@ post {
         cleanWs()
     }
 }
-```
+
 
 }
