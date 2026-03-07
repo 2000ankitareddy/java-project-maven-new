@@ -24,7 +24,7 @@ WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 
 # Expose the custom port you want (8033)
-EXPOSE 80
+EXPOSE 8033
 
 # Run the application
 # Option 1: Simple (default)
