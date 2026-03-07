@@ -3,33 +3,40 @@ FROM maven:3.9.9-eclipse-temurin-17 AS builder
 
 WORKDIR /app
 
-# Copy pom.xml first for dependency caching
+# Copy pom first → cache dependencies
 COPY pom.xml .
-
-# Download dependencies (cache layer)
 RUN mvn dependency:go-offline -B
 
-# Copy source code
+# Copy source & build
 COPY src ./src
+RUN mvn clean package -DskipTests   # Remove -DskipTests if tests important
 
-# Build the project (skip tests if you want faster)
-RUN mvn clean package -DskipTests
-
-# Stage 2: Runtime image - slim & secure
+# Stage 2: Lightweight runtime
 FROM eclipse-temurin:17-jre-alpine
+
+# Create non-root user for security (good practice)
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 WORKDIR /app
 
-# Copy only the final JAR from builder stage
+# Copy JAR from builder
 COPY --from=builder /app/target/*.jar app.jar
 
-# Expose the custom port you want (8033)
+# Change ownership to non-root
+RUN chown -R appuser:appgroup /app
+
+# Switch to non-root user
+USER appuser
+
+# Expose your custom port
 EXPOSE 8033
 
-# Run the application
-# Option 1: Simple (default)
+# For Spring Boot: Override port via ENV (uncomment if needed)
+# ENV SERVER_PORT=8033
+
+# Run the app
 CMD ["java", "-jar", "app.jar"]
 
-# Option 2: If you need to force port via ENV (Spring Boot example)
-# ENV SERVER_PORT=8033
-# CMD ["java", "-jar", "app.jar"]
+# Optional: Healthcheck (if app has /actuator/health or similar endpoint)
+# HEALTHCHECK --interval=30s --timeout=3s \
+#   CMD wget --no-verbose --tries=1 --spider http://localhost:8033/actuator/health || exit 1
