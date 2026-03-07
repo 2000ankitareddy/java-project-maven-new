@@ -51,7 +51,7 @@ pipeline {
                 sh '''
                     docker stop myapp || true
                     docker rm myapp || true
-                    docker run -d --name myapp -p 8033:8033 ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}
+                    docker run -d --name myapp -p 8033:8080 ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}
                 '''
                 echo "Docker container started!"
                 echo "Test your app at: http://localhost:8033  (or Jenkins server IP:8033)"
