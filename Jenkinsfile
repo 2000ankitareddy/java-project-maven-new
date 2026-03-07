@@ -1,22 +1,16 @@
 pipeline {
     agent any
     
-    tools {
-        // Maven auto-install if configured in Global Tool Configuration, or direct path
-        maven 'Maven'  // Change to your Maven tool name in Jenkins → Manage Jenkins → Global Tool Configuration
-        jdk 'JDK17'    // Optional: if you have JDK configured
-    }
-    
     stages {
         stage('Checkout') {
             steps {
-                checkout scm  // Already from git, but safe
+                checkout scm
             }
         }
         
         stage('Build') {
             steps {
-                sh 'mvn clean package'  // or bat 'mvn clean package' on Windows agents
+                sh 'mvn clean package'  // Assumes mvn is in PATH on agent
             }
         }
         
@@ -26,28 +20,27 @@ pipeline {
             }
             post {
                 always {
-                    junit '**/target/surefire-reports/*.xml'  // Publish test results if tests exist
+                    junit '**/target/surefire-reports/*.xml'  // Safe even if no tests
                 }
             }
         }
         
-        // Optional: Archive the JAR
         stage('Archive Artifact') {
             steps {
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                archiveArtifacts artifacts: 'target/*.jar', allowEmptyArchive: true
             }
         }
     }
     
     post {
         always {
-            cleanWs()  // Optional: clean workspace after build
+            cleanWs()
         }
         success {
             echo 'Build successful! 🎉'
         }
         failure {
-            echo 'Build failed 😞'
+            echo 'Build failed 😞 Check logs.'
         }
     }
 }
