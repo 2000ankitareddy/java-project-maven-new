@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_HUB_USERNAME = "ankitanallamilli"                    // Your Docker Hub username
         DOCKER_IMAGE_NAME   = "${DOCKER_HUB_USERNAME}/project1" // Full image name: ankithDockHub/project1
-        DOCKER_CRED_ID      = "ankithDockHub"            // Your Jenkins credential ID for Docker Hub
+        DOCKER_CRED_ID      = "dockerhub-credentials"            // Your Jenkins credential ID for Docker Hub
         DOCKER_TAG          = "${env.BUILD_NUMBER}"              // Tag with Jenkins build number
     }
     
