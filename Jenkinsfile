@@ -1,61 +1,53 @@
 pipeline {
-agent any
-
-```
-stages {
-
-    stage('Clone Repository') {
-        steps {
-            checkout scmGit(
-                branches: [[name: '*/master']],
-                userRemoteConfigs: [[
-                    credentialsId: 'aniktagit',
-                    url: 'https://github.com/2000ankitareddy/java-project-maven-new.git'
-                ]]
-            )
+    agent any
+    
+    tools {
+        // Maven auto-install if configured in Global Tool Configuration, or direct path
+        maven 'Maven'  // Change to your Maven tool name in Jenkins → Manage Jenkins → Global Tool Configuration
+        jdk 'JDK17'    // Optional: if you have JDK configured
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm  // Already from git, but safe
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'  // or bat 'mvn clean package' on Windows agents
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                sh 'mvn test'
+            }
+            post {
+                always {
+                    junit '**/target/surefire-reports/*.xml'  // Publish test results if tests exist
+                }
+            }
+        }
+        
+        // Optional: Archive the JAR
+        stage('Archive Artifact') {
+            steps {
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            }
         }
     }
-
-    stage('Build with Maven') {
-        steps {
-            sh 'mvn clean install'
+    
+    post {
+        always {
+            cleanWs()  // Optional: clean workspace after build
+        }
+        success {
+            echo 'Build successful! 🎉'
+        }
+        failure {
+            echo 'Build failed 😞'
         }
     }
-
-    stage('Stop Old Container') {
-        steps {
-            sh '''
-            docker stop java-container || true
-            docker rm java-container || true
-            '''
-        }
-    }
-
-    stage('Remove Old Image') {
-        steps {
-            sh 'docker rmi java-maven-app || true'
-        }
-    }
-
-    stage('Build Docker Image') {
-        steps {
-            sh 'docker build -t java-maven-app .'
-        }
-    }
-
-    stage('Run Docker Container') {
-        steps {
-            sh 'docker run -d -p 8033:8080 --name java-container java-maven-app'
-        }
-    }
-
-}
-
-post {
-    always {
-        cleanWs()
-    }
-}
-```
-
 }
